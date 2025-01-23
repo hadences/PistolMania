@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject mainScreen;
     [SerializeField] private GameObject hudScreen;
     [SerializeField] private GameObject endScreen;
+    [SerializeField] private TextMeshProUGUI hudScoreText;
+    [SerializeField] private GameObject scoreText;
+    [SerializeField] private GameObject highScoreText;
 
     [Header("Game System References")]
     [SerializeField] public GameObject entities;
@@ -30,13 +34,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI currentAmmoTextMesh;
     [SerializeField] private TextMeshProUGUI maxAmmoTextMesh;
 
-    private PlayerComponent playerComponent;
+    private float currentScore = 0;
+    private float highScore = 0;
 
+    private PlayerComponent playerComponent;
 
     private List<GameObject> screens = new List<GameObject>();
 
     void Start()
     {
+        loadHighScore();
+
         Time.timeScale = 0;
 
         // create instance
@@ -64,14 +72,31 @@ public class GameManager : MonoBehaviour
         hud.updateHealth(player);
     }
 
+    void OnApplicationQuit() {
+        saveHighScore();
+    }
+
+    private void saveHighScore() {
+        PlayerPrefs.SetFloat("highScore", highScore);
+    }
+
+    private void loadHighScore() {
+        highScore = PlayerPrefs.GetFloat("highScore", 0);
+    }
+
     // Update is called once per frame
     void Update()
     {
         updateHUD();
+
+        currentScore += Time.deltaTime;
+        hudScoreText.text = currentScore.ToString("F2");
     }
 
     public void startGame() {
         Time.timeScale = 1;
+
+        currentScore = 0;
 
         var spawnerObj = Instantiate(spawnerPrefab, Vector3.zero, Quaternion.identity, gameObject.transform);
         spawner = spawnerObj.GetComponent<GameSpawner>();
@@ -86,6 +111,16 @@ public class GameManager : MonoBehaviour
     }
 
     public void endGame() {
+        TextMeshProUGUI scoreTextMesh = scoreText.GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI highScoreTextMesh = highScoreText.GetComponent<TextMeshProUGUI>();
+
+        if (currentScore > highScore) {
+            highScore = currentScore;
+        }
+
+        scoreTextMesh.text = "Score: " + currentScore.ToString("F2");
+        highScoreTextMesh.text = "High Score: " + highScore.ToString("F2");
+
         player.gameObject.SetActive(false);
         spawner.killAll();
         Destroy(spawner);

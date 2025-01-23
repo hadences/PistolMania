@@ -94,6 +94,11 @@ public class GameSpawner : MonoBehaviour {
             Destroy(entity);
         }
         entities.Clear();
+    
+        foreach (GameObject ammo in ammoEntities) {
+            Destroy(ammo);
+        }
+        ammoEntities.Clear();
     }
 
     private void OnDrawGizmosSelected() {
