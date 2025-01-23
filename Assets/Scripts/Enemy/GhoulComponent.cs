@@ -90,6 +90,7 @@ public class GhoulComponent : MonoBehaviour
     }
 
     private void onDeath() {
+        SoundManager.Instance.playSound(SoundManager.ghostDeathSound, 0.25f, Random.Range(1.0f, 1.2f));
         Destroy(gameObject);
     }
 }

@@ -91,11 +91,16 @@ public class PlayerComponent : MonoBehaviour
         // reloads the ammo
         currentReloadIndicatorScale = maxReloadScale;
         isReloading = true;
+
+        SoundManager.Instance.playSound(SoundManager.reloadSound, 0.25f, Random.Range(1f, 1.25f));
+
         // delay time 
         yield return new WaitForSeconds(reloadTime);
         // set the current ammo to mag ammo acount - (check if max ammo has enough - otherwise set current as remaining ammo)
         int ammoNeeded = magAmmoCount - currentAmmo;
-        
+
+        SoundManager.Instance.playSound(SoundManager.reloadSound, 0.25f, Random.Range(1.25f, 1.5f));
+
         int ammoRemains = maxAmmo - ammoNeeded;
         if(ammoRemains > 0) {
             // we set the current ammo to the magAmmoCount
@@ -120,6 +125,9 @@ public class PlayerComponent : MonoBehaviour
 
             return;
         }
+
+        // play sound
+        SoundManager.Instance.playSound(SoundManager.shootSound, 1.0f, Random.Range(1.0f, 1.2f));
 
         currentAmmo--;
 
@@ -173,6 +181,8 @@ public class PlayerComponent : MonoBehaviour
 
     public void damage(int damage) {
         health -= damage;
+        SoundManager.Instance.playSound(SoundManager.hurtSound, 0.5f, Random.Range(1.0f, 1.2f));
+
         onDamageEvent.Invoke();
         if (health <= 0) {
             onDeathEvent.Invoke();

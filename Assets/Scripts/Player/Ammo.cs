@@ -8,6 +8,7 @@ public class Ammo : MonoBehaviour
         if(collision.tag == "Player") {
             PlayerComponent playerComp = collision.gameObject.GetComponent<PlayerComponent>();
             playerComp.maxAmmo += ammoValue;
+            SoundManager.Instance.playSound(SoundManager.happySound, 0.25f, Random.Range(1.25f, 1.5f));
 
             Destroy(gameObject);
         }
