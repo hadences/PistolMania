@@ -19,8 +19,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Game System References")]
     [SerializeField] public GameObject entities;
-    [SerializeField] private GameObject player;
+    [SerializeField] public GameObject player;
+    [SerializeField] private GameObject spawnerPrefab;
+    private GameSpawner spawner;
 
+    [Header("Prefab References")]
+    [SerializeField] private GameObject ghoulPrefab;
+    
     [Header("Ammo References")]
     [SerializeField] private TextMeshProUGUI currentAmmoTextMesh;
     [SerializeField] private TextMeshProUGUI maxAmmoTextMesh;
@@ -32,6 +37,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Time.timeScale = 0;
+
         // create instance
         if(Instance == null) {
             Instance = this;
@@ -52,6 +59,9 @@ public class GameManager : MonoBehaviour
         screens.Add (hudScreen);
         
         showScreen(ScreenType.MAIN); // show main by default
+
+        HUD hud = hudScreen.GetComponent<HUD>();
+        hud.updateHealth(player);
     }
 
     // Update is called once per frame
@@ -61,10 +71,25 @@ public class GameManager : MonoBehaviour
     }
 
     public void startGame() {
+        Time.timeScale = 1;
+
+        var spawnerObj = Instantiate(spawnerPrefab, Vector3.zero, Quaternion.identity, gameObject.transform);
+        spawner = spawnerObj.GetComponent<GameSpawner>();
+
         showScreen(ScreenType.HUD);
+        playerComponent.initPlayer();
+        player.gameObject.SetActive(true);
+        player.transform.position = Vector3.zero;
+
+        HUD hud = hudScreen.GetComponent<HUD>();
+        hud.updateHealth(player);
     }
 
     public void endGame() {
+        player.gameObject.SetActive(false);
+        spawner.killAll();
+        Destroy(spawner);
+        Time.timeScale = 0;
         showScreen(ScreenType.END);
     }
 
@@ -100,5 +125,14 @@ public class GameManager : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    public void onPlayerDeathEvent() {
+        endGame();
+    }
+
+    public void onPlayerHurtEvent() {
+        HUD hud = hudScreen.GetComponent<HUD>();
+        hud.updateHealth(player);
     }
 }

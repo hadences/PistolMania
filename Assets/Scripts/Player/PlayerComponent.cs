@@ -1,9 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class PlayerComponent : MonoBehaviour
 {
+    public UnityEvent onDamageEvent;
+    public UnityEvent onDeathEvent;
+
     [Header("Sprite Rotation")]
     [SerializeField] public GameObject sprite;
     [SerializeField] private float rotationSpeed;
@@ -16,6 +20,18 @@ public class PlayerComponent : MonoBehaviour
     [SerializeField] private int magAmmoCount = 8;
     [SerializeField] private int startingMaxAmmo = 56;
     [SerializeField] private float reloadTime = 2;
+    [SerializeField] private float maxReloadScale = 6;
+    [SerializeField] private GameObject reloadIndicator;
+
+    [Header("Player Settings")]
+    [SerializeField] public int maxHealth = 5;
+    [SerializeField] private float iFrameSeconds = 2;
+
+    private float currentReloadIndicatorScale = 0;
+    private float reloadIndicatorScaleDecrementVal = 0;
+
+    public int health;
+    private bool isInvincible = false;
 
     private bool isReloading = false;
     public int currentAmmo;
@@ -28,8 +44,7 @@ public class PlayerComponent : MonoBehaviour
 
     void Start()
     {
-        currentAmmo = magAmmoCount;
-        maxAmmo = startingMaxAmmo;
+        reloadIndicatorScaleDecrementVal = maxReloadScale / (reloadTime / Time.fixedDeltaTime);
 
         attackInput = InputSystem.actions.FindAction("Attack");
         attackInput.performed += ctx => onShoot();
@@ -39,17 +54,42 @@ public class PlayerComponent : MonoBehaviour
             if (isReloading) return;
             StartCoroutine(reload());
         };
+
+        initPlayer();
+    }
+
+    public void initPlayer() {
+        isReloading = false;
+        currentAmmo = magAmmoCount;
+        maxAmmo = startingMaxAmmo;
+        health = maxHealth;
     }
 
     // Update is called once per frame
     void Update()
     {
         rotatePlayerToMouse();
+
+        reloadIndicator.transform.position = transform.position + new Vector3(0, 0.5f, 0);
+    }
+
+    private void FixedUpdate() {
+        if (currentReloadIndicatorScale > 0) {
+            currentReloadIndicatorScale -= reloadIndicatorScaleDecrementVal;
+        }
+        currentReloadIndicatorScale = Mathf.Max(currentReloadIndicatorScale, 0);
+        reloadIndicator.transform.localScale = new Vector3(currentReloadIndicatorScale, 0.5f, 1.0f);
+    }
+
+    IEnumerator iFrameCountdown() {
+        isInvincible = true;
+        yield return new WaitForSeconds(iFrameSeconds);
+        isInvincible = false;
     }
 
     IEnumerator reload() {
         // reloads the ammo
-        Debug.Log("reloading");
+        currentReloadIndicatorScale = maxReloadScale;
         isReloading = true;
         // delay time 
         yield return new WaitForSeconds(reloadTime);
@@ -70,9 +110,11 @@ public class PlayerComponent : MonoBehaviour
     }
 
     void onShoot() {
+        if (isReloading) return; // preven the player from reloading
+
         if (currentAmmo <= 0) {
             // TODO reload
-            if (!isReloading) {
+            if (!isReloading && gameObject.activeSelf) {
                 StartCoroutine(reload());
             }
 
@@ -88,7 +130,9 @@ public class PlayerComponent : MonoBehaviour
 
         // move the player opposite dir
         Rigidbody2D playerRB = GetComponent<Rigidbody2D>();
-        playerRB.AddForce(-playerDirection * recoilForce, ForceMode2D.Impulse);
+
+        Vector2 recoil = -playerDirection.normalized * recoilForce; // Normalize for consistent magnitude
+        playerRB.AddForce(recoil, ForceMode2D.Impulse);
     }
 
     void rotatePlayerToMouse() {
@@ -98,6 +142,8 @@ public class PlayerComponent : MonoBehaviour
 
         // Compute direction and raw angle from the player to the mouse
         Vector3 direction = mousePosition - transform.position;
+
+        direction.z = 0;
 
         playerDirection = direction.normalized;
 
@@ -123,5 +169,18 @@ public class PlayerComponent : MonoBehaviour
 
         // Apply the rotation to the player
         transform.rotation = Quaternion.Euler(0f, 0f, targetAngle);
+    }
+
+    public void damage(int damage) {
+        health -= damage;
+        onDamageEvent.Invoke();
+        if (health <= 0) {
+            onDeathEvent.Invoke();
+        }
+
+        if (isInvincible) return;
+        if (isActiveAndEnabled) {
+            StartCoroutine(iFrameCountdown());
+        }
     }
 }
