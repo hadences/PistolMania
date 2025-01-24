@@ -13,6 +13,7 @@ public class PlayerComponent : MonoBehaviour
     [SerializeField] private float rotationSpeed;
 
     [Header("Gun Settings")]
+    [SerializeField] private ParticleSystem gunImpactParticle;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform shootPoint;
     [SerializeField] private float recoilForce = 2.0f;
@@ -126,6 +127,9 @@ public class PlayerComponent : MonoBehaviour
             return;
         }
 
+        // spawn particle
+        gunImpactParticle.Play();
+
         // play sound
         SoundManager.Instance.playSound(SoundManager.shootSound, 1.0f, Random.Range(1.0f, 1.2f));
 
@@ -181,6 +185,7 @@ public class PlayerComponent : MonoBehaviour
 
     public void damage(int damage) {
         health -= damage;
+        ParticleManager.Instance.spawnParticle(ParticleManager.Instance.dustParticle, transform.position, Quaternion.identity);
         SoundManager.Instance.playSound(SoundManager.hurtSound, 0.5f, Random.Range(1.0f, 1.2f));
 
         onDamageEvent.Invoke();

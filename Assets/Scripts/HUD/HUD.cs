@@ -28,8 +28,10 @@ public class HUD : MonoBehaviour
             // remove extras
             for (int start = healthDisplay.Count - 1; start >= health; start--) {
                 GameObject obj = healthDisplay[start];
-                healthDisplay.RemoveAt(start); // Use RemoveAt for better performance
-                Destroy(obj);
+                healthDisplay.RemoveAt(start); 
+
+                Heart heart = obj.GetComponent<Heart>();
+                heart.destroyHeart();
             }
 
             return;

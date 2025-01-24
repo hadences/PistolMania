@@ -90,6 +90,9 @@ public class GhoulComponent : MonoBehaviour
     }
 
     private void onDeath() {
+        ParticleManager.Instance.spawnParticle(ParticleManager.Instance.dustParticle, transform.position, Quaternion.identity);
+
+        ParticleManager.Instance.spawnParticle(ParticleManager.Instance.impactParticle, transform.position, Quaternion.identity);
         SoundManager.Instance.playSound(SoundManager.ghostDeathSound, 0.25f, Random.Range(1.0f, 1.2f));
         Destroy(gameObject);
     }

@@ -51,7 +51,7 @@ MonoBehaviour:
   target: {fileID: 0}
   movSpeed: 1.5
   maxHealth: 1
-  dashCooldownValue: 8
+  dashCooldownValue: 2
   moveSpeed: 1
   health: 0
 --- !u!50 &1071029545361125818
@@ -191,7 +191,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 190645699
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -3270371465853829570, guid: 81470980a6c19284ebe503f862899562, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
