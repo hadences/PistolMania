@@ -127,6 +127,9 @@ public class PlayerComponent : MonoBehaviour
             return;
         }
 
+        // shake camera
+        GameManager.Instance.shakeCamera(0.25f, 2.0f);
+
         // spawn particle
         gunImpactParticle.Play();
 

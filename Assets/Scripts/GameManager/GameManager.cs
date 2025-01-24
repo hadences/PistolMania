@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] public GameObject entities;
     [SerializeField] public GameObject player;
     [SerializeField] private GameObject spawnerPrefab;
+    [SerializeField] public Camera cam;
     private GameSpawner spawner;
 
     [Header("Prefab References")]
@@ -160,6 +161,11 @@ public class GameManager : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    public void shakeCamera(float duration, float intensityMultiplier) {
+        CameraShake camComp = cam.GetComponent<CameraShake>();
+        camComp.shakeCamera(duration, intensityMultiplier);
     }
 
     public void onPlayerDeathEvent() {
