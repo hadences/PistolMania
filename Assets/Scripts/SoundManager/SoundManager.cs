@@ -10,6 +10,9 @@ public class SoundManager : MonoBehaviour
     public static AudioClip happySound;
     public static AudioClip hurtSound;
     public static AudioClip ghostDeathSound;
+    public static AudioClip levelUpSound;
+    public static AudioClip terminateSound;
+    public static AudioClip clickSound;
 
     void Awake(){
         // add the singleton pattern to the SoundManager
@@ -29,7 +32,9 @@ public class SoundManager : MonoBehaviour
         happySound = registerSound("Sounds/Happy");
         hurtSound = registerSound("Sounds/Hurt");
         ghostDeathSound = registerSound("Sounds/GhostDeath");
-
+        levelUpSound = registerSound("Sounds/LevelUp");
+        terminateSound = registerSound("Sounds/Terminate");
+        clickSound = registerSound("Sounds/Click");
     }
 
     public AudioClip registerSound(String path){

@@ -5,6 +5,9 @@ public class ParticleManager : MonoBehaviour {
 
     [SerializeField] public GameObject impactParticle;
     [SerializeField] public GameObject dustParticle;
+    [SerializeField] public GameObject tetherParticle;
+    [SerializeField] public GameObject infernoParticle;
+    [SerializeField] public GameObject terminatorParticle;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

@@ -52,7 +52,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: e09b283b91f78434f866f44780cd42a4, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 264
@@ -121,6 +121,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1be8c74ab2e958f4dadae19965e2a2ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bouncy: 0
+  tether: 0
+  tetherRadius: 5
+  tetherPullForce: 0.5
 --- !u!1 &4925219464193441835
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,7 +283,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 190645699
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -2346302928887187388, guid: 9de9ad7b08bc7f14896d939666eab006, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

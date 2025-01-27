@@ -1,8 +1,11 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GhoulComponent : MonoBehaviour
 {
+    public UnityEvent onDeathEvent;
+
     [Header("Ghoul Settings")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] public GameObject target;
@@ -13,7 +16,7 @@ public class GhoulComponent : MonoBehaviour
     [SerializeField] private float dashCooldownValue = 4.0f;
     [SerializeField] private float moveSpeed = 2.0f;
 
-    private bool canMove = true;
+    public bool canMove = true;
     private bool isDashing = false;
     private float dashCooldown = 0.0f;
 
@@ -24,6 +27,7 @@ public class GhoulComponent : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        onDeathEvent.AddListener(GameManager.Instance.onGhoulDeathEvent);
         dashCooldown = dashCooldownValue;
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
@@ -63,6 +67,19 @@ public class GhoulComponent : MonoBehaviour
         }
     }
 
+    public void addForce(Vector3 motion, float speed) {
+        StartCoroutine(applyMotion(motion, speed));
+    }
+
+    IEnumerator applyMotion(Vector3 motion, float speed) {
+        canMove = false;
+        yield return new WaitForSeconds(0.1f);
+        rb.AddForce(motion * speed, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(0.6f);
+        canMove = true;
+
+    }
+
     IEnumerator dash() {
         canMove = false;
         isDashing = true;
@@ -90,6 +107,7 @@ public class GhoulComponent : MonoBehaviour
     }
 
     private void onDeath() {
+        onDeathEvent.Invoke();
         ParticleManager.Instance.spawnParticle(ParticleManager.Instance.dustParticle, transform.position, Quaternion.identity);
 
         ParticleManager.Instance.spawnParticle(ParticleManager.Instance.impactParticle, transform.position, Quaternion.identity);

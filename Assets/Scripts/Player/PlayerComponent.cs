@@ -12,9 +12,16 @@ public class PlayerComponent : MonoBehaviour
     [SerializeField] public GameObject sprite;
     [SerializeField] private float rotationSpeed;
 
+    [Header("Upgrade Settings")]
+    public bool bouncingBullets = false;
+    public bool tetherBullets = false;
+    public bool infernoBullets = false;
+    public bool scatterBullets = false;
+
+
     [Header("Gun Settings")]
     [SerializeField] private ParticleSystem gunImpactParticle;
-    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] public GameObject bulletPrefab;
     [SerializeField] private Transform shootPoint;
     [SerializeField] private float recoilForce = 2.0f;
     [SerializeField] private float bulletSpeed = 8.0f;
@@ -35,6 +42,8 @@ public class PlayerComponent : MonoBehaviour
     private bool isInvincible = false;
 
     private bool isReloading = false;
+    public float currentReloadTime = 2;
+    public float currentRecoilForce = 2.0f;
     public int currentAmmo;
     public int maxAmmo;
 
@@ -61,6 +70,8 @@ public class PlayerComponent : MonoBehaviour
 
     public void initPlayer() {
         isReloading = false;
+        currentRecoilForce = recoilForce;
+        currentReloadTime = reloadTime;
         currentAmmo = magAmmoCount;
         maxAmmo = startingMaxAmmo;
         health = maxHealth;
@@ -79,7 +90,7 @@ public class PlayerComponent : MonoBehaviour
             currentReloadIndicatorScale -= reloadIndicatorScaleDecrementVal;
         }
         currentReloadIndicatorScale = Mathf.Max(currentReloadIndicatorScale, 0);
-        reloadIndicator.transform.localScale = new Vector3(currentReloadIndicatorScale, 0.5f, 1.0f);
+        reloadIndicator.transform.localScale = new Vector3(currentReloadIndicatorScale*80f, 50.0f, 1.0f);
     }
 
     IEnumerator iFrameCountdown() {
@@ -96,7 +107,7 @@ public class PlayerComponent : MonoBehaviour
         SoundManager.Instance.playSound(SoundManager.reloadSound, 0.25f, Random.Range(1f, 1.25f));
 
         // delay time 
-        yield return new WaitForSeconds(reloadTime);
+        yield return new WaitForSeconds(currentReloadTime);
         // set the current ammo to mag ammo acount - (check if max ammo has enough - otherwise set current as remaining ammo)
         int ammoNeeded = magAmmoCount - currentAmmo;
 
@@ -115,8 +126,16 @@ public class PlayerComponent : MonoBehaviour
         isReloading = false;
     }
 
+    public void resetUpgrades() {
+        bouncingBullets = false;
+        infernoBullets = false;
+        tetherBullets = false;
+        scatterBullets = false;
+        
+    }
+
     void onShoot() {
-        if (isReloading) return; // preven the player from reloading
+        if (isReloading || !GameManager.Instance.inGame) return; // preven the player from reloading
 
         if (currentAmmo <= 0) {
             // TODO reload
@@ -141,12 +160,30 @@ public class PlayerComponent : MonoBehaviour
         // spawn the bullet on the shoot point
         GameObject bullet = Instantiate(bulletPrefab, shootPoint.position, Quaternion.identity, GameManager.Instance.entities.transform);        
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        BulletComponent bulletComponent = bullet.GetComponent<BulletComponent>();
+
+        if (bouncingBullets) {
+            bulletComponent.bouncy = true;
+        }
+
+        if (tetherBullets) {
+            bulletComponent.tether = true;
+        }
+
+        if (infernoBullets) {
+            bulletComponent.inferno = true;
+        }
+
+        if(scatterBullets) {
+            bulletComponent.scatter = true;
+        }
+
         rb.AddForce(playerDirection * bulletSpeed, ForceMode2D.Impulse);
 
         // move the player opposite dir
         Rigidbody2D playerRB = GetComponent<Rigidbody2D>();
 
-        Vector2 recoil = -playerDirection.normalized * recoilForce; // Normalize for consistent magnitude
+        Vector2 recoil = -playerDirection.normalized * currentRecoilForce; // Normalize for consistent magnitude
         playerRB.AddForce(recoil, ForceMode2D.Impulse);
     }
 

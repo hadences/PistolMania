@@ -14,6 +14,7 @@ public class GameSpawner : MonoBehaviour {
 
     [SerializeField] private float minAmmoSpawnInterval = 10f;
     [SerializeField] private float maxAmmoSpawnInterval = 20f;
+    [SerializeField] public int ammoSupply = 8; // how much ammo it should give to player
     private float nextAmmoSpawnTime = 0f;
 
     [Header("Difficulty Settings")]
@@ -66,6 +67,9 @@ public class GameSpawner : MonoBehaviour {
         } while (Vector3.Distance(spawnPosition, player.position) < minSpawnDistance); // Avoid spawning too close
 
         var ammo = Instantiate(ammoPrefab, spawnPosition, Quaternion.identity);
+        Ammo ammoComp = ammo.GetComponent<Ammo>();
+        ammoComp.ammoValue = ammoSupply;
+
         ammoEntities.Add(ammo);
     }
 
@@ -89,11 +93,16 @@ public class GameSpawner : MonoBehaviour {
         entities.Add(ghoul);
     }
 
-    public void killAll() {
-        foreach (GameObject entity in entities) {
-            Destroy(entity);
-        }
-        entities.Clear();
+    public void setAmmoSupply(int amount) {
+        ammoSupply = amount;
+    }
+
+    public void reset() {
+
+        // set ammo back to 8
+        ammoSupply = 8;
+
+        killAllMobs();
     
         foreach (GameObject ammo in ammoEntities) {
             Destroy(ammo);
@@ -101,6 +110,12 @@ public class GameSpawner : MonoBehaviour {
         ammoEntities.Clear();
     }
 
+    public void killAllMobs() {
+        foreach (GameObject entity in entities) {
+            Destroy(entity);
+        }
+        entities.Clear();
+    }
     private void OnDrawGizmosSelected() {
         // Visualize the arena in the editor
         Gizmos.color = Color.green;
